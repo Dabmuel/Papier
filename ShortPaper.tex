@@ -78,13 +78,12 @@ That's why we have implemented the following architecture, mainly consisting of 
 	\label{class diagram}
 \end{figure}
 
-WIP: Program not quite finished yet.
-
 \begin{itemize}
 	\item Container \ref{class diagram}: This class contains an instance of each type of container being tested and serves as an abstraction for using the operations of these containers. It uses an enumerator \code{STATE} to define which container is being used at any given moment.
 	\item Scenario \ref{class diagram}: This abstract class utilizes the container and contains the benchmarked algorithm.
 	\item Benchmark \ref{class diagram}: This class utilizes the scenario, executes its algorithm as many times as necessary, measures its performance, and sends the results.
-	\item Config \ref{class diagram}: This class contains various execution parameters for the benchmark, such as the size of the dataset, the number of repeated measurements, etc.
+	\item Results \ref{class diagram}: This class is called by the benchmark object and store all result data to create the final CSV file.
+	\item Config \ref{class diagram}: This static class contains various execution parameters for the benchmark, such as the size of the dataset, the number of repeated measurements, etc.
 \end{itemize}
 
 \subsection{How to use}
