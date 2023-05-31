@@ -198,6 +198,22 @@ the \code{run} method. These steps encompass the essential user
 requirements. Furthermore, we offer illustrative benchmarking
 procedures along with their corresponding outcomes as examples.
 
+Here is an example of a benchmark procedure implementation
+\begin{lstlisting}
+	struct Test : Scenario<int>
+	{
+		Test(Container<int> *container) : Scenario<int>(container) {}
+		
+		void operator()(int data[], int length) override
+		{
+			for (int i = 0; i < length; i++)
+			{
+				container->insert(data[i]);
+			}
+		}
+	};
+\end{lstlisting}
+
 In order to cover a variety of use cases, we decided to
 implement a configuration file named \code{config.hpp}. We therefore
 have 2 types of test defined by the \code{isMultiple} variable:
@@ -254,9 +270,8 @@ Here are the complete contents of the configuration file:
 
 \section{Vector vs unordered set}
 
-\subsection{Implementation}
-
-We can use the software to address the problem presented in the
+To demonstrate our software, we can use it to address the problem 
+presented in the
 introduction as an example application. As a reminder, the problem is
 to determine from what data size \code{std::vector} becomes faster
 than \code{std::unordered\_set} in determining whether an element is
@@ -265,21 +280,50 @@ problem with constant complexity using hashing, while
 \code{std::vector} requires potentially traversing the entire
 container. There is no doubt that traversing the entire container is
 slower than hashing when the container contains a large amount of
-data. However, this may not be the case for small datasets.
+data. However, this may not be the case for small datasets. It is 
+worth noting that every code here was compiled with maximum 
+optimization.
 
-WIP: Program not quite finished yet.
+\subsection{Insertion}
 
-\subsection{Result}
+The first operation we benchmarked was a simple insertion. We simply 
+insert every data one by one in the container. 
 
+This is the exact benchmark procedure:
+\begin{lstlisting}
+	struct Test : Scenario<int>
+	{
+		Test(Container<int> *container) : Scenario<int>(container) {}
+		
+		void operator()(int data[], int length) override
+		{
+			for (int i = 0; i < length; i++)
+			{
+				container->insert(data[i]);
+			}
+		}
+	};
+\end{lstlisting}
 
+Here we can see the insertion time of the \code{vector} and 
+\code{unordered\_set} with a dataset going from 0 to 100 :
 
 \begin{figure}[!h]
 	\includegraphics[width=9cm]{Diagram/insertion.png}
-	\caption{Vector and set execution times}
+	\caption{Vector and set insertion times}
 	\label{vector vs set}
 \end{figure}
 
-WIP: Program not quite finished yet.
+We can see that when it comes to simple insertion, \code{vector} is 
+significantly  faster than \code{unordered\_set}, regardless the 
+dataset size. This can be attributed to the fact that optimized 
+compilers often allocate memory in larger chunks when creating a vector. 
+Since the dataset isn't very large, memory can be allocated only once 
+for the vector, unlike the unordered set. The variation in insertion 
+time for the unordered set, depending on the dataset size, can be 
+explained by the occurrence of collisions. The insertion time of an 
+element in an unordered set depends on whether it creates a collision 
+or not.
 
 \section{Conclusion}
 
