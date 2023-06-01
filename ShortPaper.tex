@@ -17,7 +17,7 @@
   breaklines=true, breakatwhitespace=true, tabsize=3 }
 
 %opening
-\title{Micro-benchmarking of C++ STL/Boost libraries} \author{Victor
+\title{Micro-benchmarking of C++ containers} \author{Victor
   BERNARD, Samuel JUNG, François PANSERA}
 
 \begin{document}
@@ -315,8 +315,8 @@ Here we can see the insertion time of the \code{vector} and
 \end{figure}
 
 We can see that when it comes to simple insertion, \code{vector} is 
-significantly  faster than \code{unordered\_set}, regardless the 
-dataset size. This can be attributed to the fact that optimized 
+significantly  faster than \code{unordered\_set}, at least for normal/small datasets. 
+This can be attributed to the fact that optimized 
 compilers often allocate memory in larger chunks when creating a vector. 
 Since the dataset isn't very large, memory can be allocated only once 
 for the vector, unlike the unordered set. The variation in insertion 
@@ -327,15 +327,77 @@ or not.
 
 \subsection{Look up}
 
+Then we benchmarked the lookup, which means checking if a particular 
+element is contained. As mentioned earlier, for the vector, the entire 
+container is tested one by one until the value is found. This 
+corresponds to linear complexity O(n). For the unordered set, a simple 
+hashing allows checking this information, which means constant 
+complexity O(1). We decided, in order to illustrate these different 
+complexities well, to choose to check if the container has its last 
+element. The answer will always be yes, but theoretically, it is the 
+worst case scenario for the vector.
+
+This is the exact benchmark procedure:
+\begin{lstlisting}
+	struct Test : Scenario<int>
+	{
+		Test(Container<int> *container) : Scenario<int>(container) {}
+		
+		void operator()(int data[], int length) override
+		{
+			//VICTOR HERE CODE
+		}
+	};
+\end{lstlisting}
+
+
+This algorithm will be executed much faster than the previous test. 
+To avoid measuring noise, we took 1000 measurements per data set size 
+with a step of 1. Here are the results of the numerous measurements:
 \begin{figure}[!h]
 	\includegraphics[width=9cm]{Diagram/lookup.png}
 	\caption{Vector and set look up times}
 	\label{vector vs set lookup}
 \end{figure}
 
+Despite our efforts, we can observe some instabilities in the curves, 
+but the constant nature of the unordered set and the linear nature of 
+the vector are clearly visible, as shown in the following diagram:
+\begin{figure}[!h]
+	\includegraphics[width=9cm]{Diagram/lookup_courbe.png}
+	\caption{Vector and set look up times simplified}
+	\label{vector vs set lookup curve}
+\end{figure}
+
+We can see that initially, the lookup is faster for a vector than 
+for an unordered set, but from a data size of approximately 40, the 
+vector becomes slower. Taking into account the measurement 
+uncertainties, we can estimate from these results that for a size 
+below 30, the vector is faster for a lookup, for a size between 30 
+and 50, the difference is negligible, and for a size above 50 elements, 
+the unordered set is faster for a lookup. Of course, this applies to 
+our desktop environment on an x86 architecture and may not be identical 
+in all environments. For another environment, it would be preferable 
+to re-run the benchmark on it.
+
 \section{Conclusion}
 
-WIP: Program not quite finished yet.
+Our software allows for conducting small-scale benchmarks on various 
+containers in the C++ language, including libraries such as STL. We 
+were able to test its efficiency on the example of \code{std::vector} 
+vs \code{std::unordered\_set}. We were able to determine from which data 
+size it is faster to check if an element is present in a container for 
+the unordered set compared to the vector in our x86 environment. This 
+information could assist us in selecting the appropriate containers for 
+our C++ programs, regardless of the execution environment.
+
+To ensure the quality of measurements through the benchmark, it is 
+important to give high priority to the benchmark process in the 
+operating system and compile the program with maximum optimizations.
+
+Currently, the program only tests the \code{std::vector} and 
+\code{std::unordered\_set} containers, but it would be interesting to 
+compare more containers, including other libraries such as Boost.
 
 \bibliographystyle{plain} \bibliography{ShortPaper-Refs.bib}
 
